@@ -1,0 +1,5 @@
+.env
+__pycache__/
+tests
+logs/*
+discord_self_package
