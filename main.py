@@ -90,6 +90,7 @@ def setup():
     bot_start_time = int(time.time())
     helper.init_logs()
 
+    # Todo: Add info if bot token isnt in .env
     bot.run(BOT_TOKEN)
 
 setup()

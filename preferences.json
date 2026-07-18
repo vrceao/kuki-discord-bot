@@ -35,6 +35,12 @@
             "enabled": true
         },
         {
+            "name": "read_screen",
+            "description": "a",
+            "category": "system",
+            "enabled": true
+        },
+        {
             "name": "tibia_character",
             "description": "a",
             "category": "tibia",

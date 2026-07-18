@@ -115,6 +115,8 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
             else:
                 contents_string += f"`⚠️` Truncated {remaining} results"
             break
+
+        # Make this better and finish it lol
         if os.path.isdir(full_path):
             icon = f"`{icons['folder']}`"
         elif len(entry.split(".")) == 1:
@@ -264,6 +266,7 @@ async def read_file(interaction: discord.Interaction, monitor: app_commands.Choi
 
     os.makedirs("data/screenshots", exist_ok=True)
 
+    # Todo: Put the monitor config to preferences.json somehow
     if monitor.value == "primary":
         x = 0
         y = 0
