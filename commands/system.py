@@ -1,10 +1,14 @@
 import discord
 from discord import app_commands
 import os
+import pyautogui
 
 from bot import bot
 import helper
 
+preferences = helper.load_file("preferences.json")
+
+# Move all this config to preferences.json
 blacklisted_extensions = [
     "env",
     "kdbx",
@@ -37,6 +41,34 @@ possible_syntax_highlights = [
     "sql", "sh", "php",
     "rb", "go", "rs",
     "lua", "md", "ini"
+]
+
+# Todo: Put this in preferences.json and load from there
+icons = {
+    "folder": "📁",
+    "file": "📄",
+
+    "picture": "🖼️",
+    "video": "🎥",
+    "audio": "🔉",
+    "executable": "⚙️",
+    "archive": "🗜️",
+    "text": "📜",
+}
+
+# Todo: Put this in preferences too
+# Maybe instead just put it by file extension so like png: x, jpg: y, txt: z etc.
+extension_types = {
+    "picture": ["png", "jpg", "jpeg", "webp", "kra", "psd", "gif"],
+    "video": ["mp4", "mkv", "mov", "avi"],
+    "audio": ["mp3", "opus", "wav"],
+    "executable": ["exe"],
+    "archive": ["zip", "rar", "7z", "tar", "gz"],
+    "text": ["txt", "html", "xml", "css", "js", "ts", "json", "jsonc", "py", "md", "bat", "gitignore"]
+}
+
+image_extensions = [
+    "png", "jpg", "jpeg", "gif"
 ]
 
 # Todo: Make "D:" and other drive letters work as a path because now it displays the current directory lol
@@ -83,7 +115,20 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
             else:
                 contents_string += f"`⚠️` Truncated {remaining} results"
             break
-        icon = "`📁`" if os.path.isdir(full_path) else "`📄`"
+        if os.path.isdir(full_path):
+            icon = f"`{icons['folder']}`"
+        elif len(entry.split(".")) == 1:
+            icon = f"`{icons['file']}`"
+        else:
+            extension = entry.split(".")[len(entry.split(".")) - 1]
+            if extension in extension_types["picture"]:
+                icon = icon = f"`{icons['picture']}`"
+            elif extension in extension_types["video"]:
+                icon = icon = f"`{icons['video']}`"
+            elif extension in extension_types["audio"]:
+                icon = icon = f"`{icons['audio']}`"
+            else:
+                icon = f"`{icons['file']}`"
         contents_string += f"{icon} {entry}\n"
         displayed += 1
     else:
@@ -140,6 +185,7 @@ async def read_file(interaction: discord.Interaction, path: str, character_limit
 
     file_extension = path.split(".")[len(path.split(".")) - 1]
 
+    # Blocking blacklisted extensions
     if file_extension in blacklisted_extensions:
         description = "`⚠️` This file extension is blacklisted for reading"
 
@@ -152,10 +198,29 @@ async def read_file(interaction: discord.Interaction, path: str, character_limit
         await interaction.response.send_message(embed=embed)
         return
 
-    # Todo: Add a codeblock if the file extension is valid
+    # Images
+    if file_extension in image_extensions:
+        embed = discord.Embed(
+            title=f"File: \"{path}\"",
+            description="",
+            color=discord.Color.yellow()
+        )
+
+        if len(path.split("/")) == 1:
+            fileName = path.split(".")[0]
+        else:
+            fileName = path.split("/")[-1].split(".")[0]
+        imageFile = discord.File(path, filename=f"{fileName}.{file_extension}")
+        embed.set_image(url=f"attachment://{fileName}.{file_extension}")
+
+        await interaction.response.send_message(embed=embed, file=imageFile)
+        return
+
+    # Reading
     with open(path, "r", encoding="utf-8") as f:
         full_file_content = f.read()
 
+    # Codeblock
     codeblock_language = ""
     for i in range(len(possible_syntax_highlights)):
         if file_extension == possible_syntax_highlights[i]:
@@ -186,3 +251,47 @@ async def read_file(interaction: discord.Interaction, path: str, character_limit
     embed.set_footer(text=f"📜 Characters: {len(full_file_content)} (Displaying {len(file_content)} which is {percentage_displayed:.2f}%) • 💾 Size: {helper.format_filesize(file_size)}")
 
     await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="read_screen", description="View the screen")
+@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+@app_commands.choices(monitor=[
+    app_commands.Choice(name="Primary", value="primary"),
+    app_commands.Choice(name="Second", value="second"),
+    app_commands.Choice(name="All", value="all")
+])
+async def read_file(interaction: discord.Interaction, monitor: app_commands.Choice[str]):
+    helper.used_command("read_screen")
+
+    os.makedirs("data/screenshots", exist_ok=True)
+
+    if monitor.value == "primary":
+        x = 0
+        y = 0
+        width = 1920
+        height = 1080
+    elif monitor.value == "second":
+        x = -1920
+        y = 0
+        width = 1920
+        height = 1080
+    elif monitor.value == "all":
+        x = -1920
+        y = 0
+        width = 3840
+        height = 1080
+
+    fileName = f"{helper.current_timestamp().replace(" ", "-").replace(":", "-")}.png"
+    path = f"data/screenshots/{fileName}"
+    if not os.path.exists(path):
+        from PIL import ImageGrab
+
+        screenshot = ImageGrab.grab(
+            bbox=(x, y, x + width, y + height),
+            all_screens=True
+        )
+
+        screenshot.save(path)
+
+    imageFile = discord.File(path, filename=f"{fileName}.png")
+
+    await interaction.response.send_message(file=imageFile)

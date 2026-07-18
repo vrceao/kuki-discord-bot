@@ -2,7 +2,6 @@ import discord
 from discord import app_commands
 import os
 from dotenv import load_dotenv
-import json
 import time
 
 from bot import bot
@@ -10,7 +9,7 @@ import helper
 
 import commands.system
 import commands.tibia
-import commands.fun
+import commands.other
 # Todo: Add roblox integration to share what game I'm playing
 # Todo: Add discord integration (self-bot) (hard) (VERY HARD)
 
@@ -18,8 +17,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-with open("preferences.json", "r", encoding="utf-8") as file:
-    preferences = json.load(file)
+preferences = helper.load_file("preferences.json")
 
 bot_start_time = None
 
@@ -58,8 +56,26 @@ async def info(interaction: discord.Interaction):
 async def commands(interaction: discord.Interaction):
     helper.used_command("commands")
 
-    # Todo: this
-    embed = Discord.embed(
+    # HARD
+
+    # commands_string = ""
+    # if preferences["count_commands"]:
+    #     path = "data/counts.json"
+    #     if not os.path.exists(path):
+    #         return
+
+    #     counts = helper.load_file("data/counts.json")
+    #     for command_name, enabled in preferences["commands"].items():
+    #         if enabled:
+    #             if command_name in counts:
+
+    #             commands_string += f"{command_name}\n"
+    # else:
+    #     for command_name, enabled in preferences["commands"].items():
+    #         if enabled:
+    #             commands_string += f"{command_name}\n"
+
+    embed = discord.Embed(
         title=f"{bot.user} commands",
         description="Here display all the available commands and how many times they been used if count_commands is enabled",
         color=discord.Color.yellow()

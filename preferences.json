@@ -1,6 +1,56 @@
 {
-    "version": 1,
+    "version": 2,
     "github_repo": "https://github.com/vrceao/kuki-discord-bot",
     "count_commands": true,
-    "log_commands": true
+    "log_commands": true,
+    "commands": [
+        {
+            "name": "ping",
+            "description": "a",
+            "category": "main",
+            "enabled": true
+        },
+        {
+            "name": "info",
+            "description": "a",
+            "category": "main",
+            "enabled": true
+        },
+        {
+            "name": "commands",
+            "description": "a",
+            "category": "main",
+            "enabled": true
+        },
+        {
+            "name": "read_directory",
+            "description": "a",
+            "category": "system",
+            "enabled": true
+        },
+        {
+            "name": "read_file",
+            "description": "a",
+            "category": "system",
+            "enabled": true
+        },
+        {
+            "name": "tibia_character",
+            "description": "a",
+            "category": "tibia",
+            "enabled": true
+        },
+        {
+            "name": "tibia_boosted",
+            "description": "a",
+            "category": "tibia",
+            "enabled": true
+        },
+        {
+            "name": "image",
+            "description": "a",
+            "category": "other",
+            "enabled": true
+        }
+    ]
 }

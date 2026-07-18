@@ -2,10 +2,14 @@ import json
 import time
 import humanize
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
-with open("preferences.json", "r", encoding="utf-8") as file:
-    preferences = json.load(file)
+def load_file(path):
+    with open(path, "r", encoding="utf-8") as file:
+        result = json.load(file)
+    return result
+
+preferences = load_file("preferences.json")
 
 def colored(r, g, b, text, bold=False):
     style = "1;" if bold else ""
@@ -28,8 +32,7 @@ def init_logs():
 
     path = f"logs/{current_timestamp().replace(" ", "-").replace(":", "-")}.json"
 
-    if not os.path.exists("logs"):
-        os.mkdir("logs")
+    os.makedirs("logs", exist_ok=True)
 
     if not os.path.exists(path):
         with open(path, "w", encoding="utf-8") as f:
@@ -41,13 +44,12 @@ def log_command(command_name):
     if not os.path.exists(log_file):
         print("log file doesnt exist for some reason")
 
-    with open(log_file, "r", encoding="utf-8") as f:
-        log = json.load(f)
+    log = load_file(log_file)
 
     log.append({
         "version": preferences["version"],
-        "unix": int(str(time.time()).split(".")[0]),
-        "time": current_timestamp(),
+        "unix_timestamp": int(str(time.time()).split(".")[0]),
+        "timestamp": current_timestamp(),
         "command": command_name
     })
 
@@ -57,15 +59,13 @@ def log_command(command_name):
 def count_command(command_name):
     path = "data/counts.json"
 
-    if not os.path.exists("data"):
-        os.mkdir("data")
+    os.makedirs("data", exist_ok=True)
 
     if not os.path.exists(path):
         with open(path, "w", encoding="utf-8") as f:
             f.write("{}")
 
-    with open(path, "r", encoding="utf-8") as f:
-        counts = json.load(f)
+    counts = load_file(path)
 
     if command_name in counts:
         counts[command_name] += 1
@@ -78,6 +78,7 @@ def count_command(command_name):
 def used_command(command_name):
     if preferences["log_commands"]:
         log_command(command_name)
+        # [*] Calling youmu_stare
         print(f"{prefix()} Calling {colored(128, 255, 128, command_name)}")
     if preferences["count_commands"]:
         count_command(command_name)

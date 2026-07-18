@@ -1,1 +1,3 @@
-Don't read me
+# Kuki Bot (˶˃ ᵕ ˂˶)
+
+Discord Bot with random features
