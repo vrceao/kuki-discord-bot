@@ -6,56 +6,62 @@
     "commands": [
         {
             "name": "ping",
-            "description": "a",
+            "description": "Ping the bot to check if it's online and get the response time",
             "category": "main",
             "enabled": true
         },
         {
             "name": "info",
-            "description": "a",
+            "description": "View information about the bot",
             "category": "main",
             "enabled": true
         },
         {
             "name": "commands",
-            "description": "a",
+            "description": "View available commands (WIP)",
             "category": "main",
             "enabled": true
         },
         {
             "name": "read_directory",
-            "description": "a",
+            "description": "Display contents of a directory on host's computer",
             "category": "system",
             "enabled": true
         },
         {
             "name": "read_file",
-            "description": "a",
+            "description": "Display contents of a file on host's computer",
             "category": "system",
             "enabled": true
         },
         {
             "name": "read_screen",
-            "description": "a",
+            "description": "Send an image of host's computer screen",
             "category": "system",
             "enabled": true
         },
         {
             "name": "tibia_character",
-            "description": "a",
+            "description": "View information about a character in Tibia",
             "category": "tibia",
             "enabled": true
         },
         {
             "name": "tibia_boosted",
-            "description": "a",
+            "description": "View information about boosted creatures in Tibia (WIP)",
             "category": "tibia",
             "enabled": true
         },
         {
             "name": "image",
-            "description": "a",
+            "description": "Send an image from the assets/ directory",
             "category": "other",
+            "enabled": true
+        },
+        {
+            "name": "minecraft_players_online",
+            "description": "View information about a Minecraft server",
+            "category": "minecraft",
             "enabled": true
         }
     ]

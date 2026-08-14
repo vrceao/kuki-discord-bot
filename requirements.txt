@@ -4,3 +4,4 @@ humanize
 requests
 pyautogui
 pillow
+mcstatus

@@ -1,7 +1,5 @@
 import discord
 from discord import app_commands
-import os
-from dotenv import load_dotenv
 import time
 
 from bot import bot
@@ -10,12 +8,11 @@ import helper
 import commands.system
 import commands.tibia
 import commands.other
+import commands.minecraft
 # Todo: Add roblox integration to share what game I'm playing
 # Todo: Add discord integration (self-bot) (hard) (VERY HARD)
 
-load_dotenv()
-
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = helper.env("BOT_TOKEN")
 
 preferences = helper.load_file("preferences.json")
 
@@ -88,6 +85,7 @@ async def commands(interaction: discord.Interaction):
 def setup():
     global bot_start_time
     bot_start_time = int(time.time())
+    helper.init_temp()
     helper.init_logs()
 
     # Todo: Add info if bot token isnt in .env

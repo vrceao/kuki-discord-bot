@@ -1,8 +1,15 @@
 import json
 import time
 import humanize
+import shutil
 import os
+from dotenv import load_dotenv
 from datetime import datetime
+
+load_dotenv()
+
+def env(name):
+    return os.getenv(name)
 
 def load_file(path):
     with open(path, "r", encoding="utf-8") as file:
@@ -26,6 +33,10 @@ def prefix():
     return colored(128, 128, 128, current_timestamp(), True)
 
 log_file = None
+
+def init_temp():
+    shutil.rmtree("temp", ignore_errors=True)
+    os.makedirs("temp", exist_ok=True)
 
 def init_logs():
     global log_file

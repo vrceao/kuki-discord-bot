@@ -164,6 +164,7 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
     await interaction.response.send_message(embed=embed)
 
 # Todo: When reading a file add ability to change starting character so that you can read the file in multiple requests even if its big
+# Todo: Also add ability to read from the end rather than from start
 @bot.tree.command(name="read_file", description="Read file contents")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def read_file(interaction: discord.Interaction, path: str, character_limit: int = 1000):

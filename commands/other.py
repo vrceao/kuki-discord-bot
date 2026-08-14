@@ -1,6 +1,5 @@
 import discord
 from discord import app_commands
-import time
 from bot import bot
 import helper
 
@@ -11,10 +10,10 @@ import helper
     app_commands.Choice(name="youmu_stare", value="youmu_stare"),
     app_commands.Choice(name="reimupressure", value="reimupressure"),
 ])
-async def image(interaction: discord.Interaction, image: app_commands.Choice[str], in_embed: bool=True):
+async def image(interaction: discord.Interaction, image: app_commands.Choice[str], in_embed: bool = True):
     helper.used_command("image")
 
-    imageFile = discord.File(f"assets/{image.value}.jpg", filename=f"{image.value}.jpg")
+    image_file = discord.File(f"assets/{image.value}.jpg", filename=f"{image.value}.jpg")
 
     if in_embed:
         embed = discord.Embed(
@@ -23,6 +22,6 @@ async def image(interaction: discord.Interaction, image: app_commands.Choice[str
 
         embed.set_image(url=f"attachment://{image.value}.jpg")
 
-        await interaction.response.send_message(embed=embed, file=imageFile)
+        await interaction.response.send_message(embed=embed, file=image_file)
     else:
-        await interaction.response.send_message(file=imageFile)
+        await interaction.response.send_message(file=image_file)
