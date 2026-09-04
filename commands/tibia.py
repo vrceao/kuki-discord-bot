@@ -10,7 +10,7 @@ import helper
 @bot.tree.command(name="tibia_character", description="Display information about character")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def tibia_character(interaction: discord.Interaction, character_name: str):
-    helper.used_command("tibia_character")
+    helper.used_command(interaction)
 
     tibia_response = requests.get(f"https://api.tibiadata.com/v4/character/{character_name}").json()
 
@@ -78,7 +78,7 @@ async def tibia_character(interaction: discord.Interaction, character_name: str)
 @bot.tree.command(name="tibia_boosted", description="See today's boosted creatures")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def tibia_boosted(interaction: discord.Interaction):
-    helper.used_command("tibia_boosted")
+    helper.used_command(interaction)
 
     tibia_response = requests.get("https://api.tibiadata.com/v4/boostablebosses").json()
 

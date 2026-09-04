@@ -11,7 +11,7 @@ DEFAULT_MINECRAFT_SERVER_IP = helper.env("DEFAULT_MINECRAFT_SERVER_IP")
 @bot.tree.command(name="minecraft_server", description="View information about a Minecraft server")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def minecraft_server(interaction: discord.Interaction, ip: str = DEFAULT_MINECRAFT_SERVER_IP):
-    helper.used_command("minecraft_server")
+    helper.used_command(interaction)
 
     server = JavaServer.lookup(ip)
     status = server.status()

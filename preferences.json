@@ -1,5 +1,6 @@
 {
-    "version": 2,
+    "version": 3,
+    "json_format_version": 1,
     "github_repo": "https://github.com/vrceao/kuki-discord-bot",
     "count_commands": true,
     "log_commands": true,
@@ -8,7 +9,12 @@
             "name": "ping",
             "description": "Ping the bot to check if it's online and get the response time",
             "category": "main",
-            "enabled": true
+            "enabled": true,
+            "config": {
+                "format": "`🟢` Online • Response time: {PING}{UNIT}",
+                "unit": "ms",
+                "precision": 2
+            }
         },
         {
             "name": "info",
@@ -55,6 +61,12 @@
         {
             "name": "image",
             "description": "Send an image from the assets/ directory",
+            "category": "other",
+            "enabled": true
+        },
+        {
+            "name": "hash",
+            "description": "Hashes a string",
             "category": "other",
             "enabled": true
         },

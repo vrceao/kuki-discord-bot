@@ -75,7 +75,7 @@ image_extensions = [
 @bot.tree.command(name="read_directory", description="Read directory contents")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: int = 20, display_filtered: bool = False):
-    helper.used_command("read_directory")
+    helper.used_command(interaction)
 
     # Error catching
     if not os.path.isdir(dir):
@@ -168,7 +168,7 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
 @bot.tree.command(name="read_file", description="Read file contents")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def read_file(interaction: discord.Interaction, path: str, character_limit: int = 1000):
-    helper.used_command("read_file")
+    helper.used_command(interaction)
 
     # Error catching
     if os.path.isdir(path) or not os.path.exists(path):
@@ -263,7 +263,7 @@ async def read_file(interaction: discord.Interaction, path: str, character_limit
     app_commands.Choice(name="All", value="all")
 ])
 async def read_file(interaction: discord.Interaction, monitor: app_commands.Choice[str]):
-    helper.used_command("read_screen")
+    helper.used_command(interaction)
 
     os.makedirs("data/screenshots", exist_ok=True)
 

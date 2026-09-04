@@ -26,7 +26,6 @@ def current_timestamp():
     formatted = str(datetime.now()).split(".")[0]
     date = formatted.split(" ")[0]
     time = formatted.split(" ")[1]
-    date = f"{date.split('-')[2]}.{date.split('-')[1]}.{date.split('-')[0]}"
     return date + " " + time
 
 def prefix():
@@ -51,17 +50,27 @@ def init_logs():
 
     log_file = path
 
-def log_command(command_name):
+def log_command(interaction):
     if not os.path.exists(log_file):
         print("log file doesnt exist for some reason")
+        return
 
     log = load_file(log_file)
 
+    arguments = {
+        key: str(value)
+        for key, value in vars(interaction.namespace).items()
+    }
+
     log.append({
+        "json_format_version": preferences["json_format_version"],
         "version": preferences["version"],
         "unix_timestamp": int(str(time.time()).split(".")[0]),
         "timestamp": current_timestamp(),
-        "command": command_name
+        "command": interaction.command.name,
+        "user": interaction.user.name,
+        "channel": interaction.channel.name,
+        "arguments": arguments
     })
 
     with open(log_file, "w", encoding="utf-8") as f:
@@ -86,14 +95,33 @@ def count_command(command_name):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(counts, f, indent=4)
 
-def used_command(command_name):
+def command_call(interaction):
+    return f"{prefix()} @{colored(128, 255, 128, interaction.user.name)} called /{colored(128, 255, 128, interaction.command.name)} in #{colored(128, 255, 128, interaction.channel.name)}"
+
+def used_command(interaction):
     if preferences["log_commands"]:
-        log_command(command_name)
+        log_command(interaction)
         # [*] Calling youmu_stare
-        print(f"{prefix()} Calling {colored(128, 255, 128, command_name)}")
+        print(f"{command_call(interaction)} successfully")
     if preferences["count_commands"]:
-        count_command(command_name)
+        count_command(interaction.command.name)
         return
+
+def error_command(interaction, message):
+    print(f"{command_call(interaction)} which resulted in an error: {colored(255, 128, 128, message)}")
+    return
 
 def format_filesize(size):
     return humanize.naturalsize(size)
+
+def get_command_config(interaction):
+    for command in preferences["commands"]:
+        if command["name"] == interaction.command.name:
+            return command["config"]
+    return None
+
+def replace_format_values(original, replacements):
+    modified = original
+    for replacement in replacements:
+        modified = modified.replace(replacement[0], replacement[1])
+    return modified

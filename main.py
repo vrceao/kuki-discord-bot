@@ -25,14 +25,32 @@ async def on_ready():
 @bot.tree.command(name="ping", description="See if bot if online")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def ping(interaction: discord.Interaction):
-    helper.used_command("ping")
+    helper.used_command(interaction)
 
-    await interaction.response.send_message(f"`🟢` Online • Response time: {bot.latency * 1000:.2f}ms")
+    config = helper.get_command_config(interaction)
+
+    unit = config["unit"]
+    latency = bot.latency * 1000
+
+    if unit == "μs":
+        latency = latency * 1000
+    elif unit == "s":
+        latency = latency / 1000
+    elif unit != "ms":
+        helper.error_command(interaction, "Unit was not assigned to a proper unit. Please use one of the following: s, ms, μs. Defaulting to ms")
+        unit = "ms"
+
+    response = helper.replace_format_values(config["format"], [
+        ["{PING}", f"{latency:.{config["precision"]}f}"],
+        ["{UNIT}", unit]
+    ])
+
+    await interaction.response.send_message(response)
 
 @bot.tree.command(name="info", description="View information about this bot")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def info(interaction: discord.Interaction):
-    helper.used_command("info")
+    helper.used_command(interaction)
 
     repo = f"`🔗` Github: {preferences['github_repo']}"
     discord_timestamp = f"<t:{bot_start_time}:R>"
@@ -51,7 +69,7 @@ async def info(interaction: discord.Interaction):
 @bot.tree.command(name="commands", description="View the commands for this bot")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def commands(interaction: discord.Interaction):
-    helper.used_command("commands")
+    helper.used_command(interaction)
 
     # HARD
 
