@@ -11,27 +11,52 @@ DEFAULT_MINECRAFT_SERVER_IP = helper.env("DEFAULT_MINECRAFT_SERVER_IP")
 @bot.tree.command(name="minecraft_server", description="View information about a Minecraft server")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def minecraft_server(interaction: discord.Interaction, ip: str = DEFAULT_MINECRAFT_SERVER_IP):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
+    config = helper.get_command_config(interaction)
 
     server = JavaServer.lookup(ip)
     status = server.status()
 
-    motd = f"`ℹ️` {re.sub("§.", "", status.description)}".replace("\n", "\n`ℹ️` ")
-    version = f"`⚙️` Version: {status.version.name}"
-    player_count = f"`📊` Player count: {status.players.online}/{status.players.max}"
+    motd = f"{config["motd_prefix"]}{re.sub("§.", "", status.description)}".replace("\n", f"\n{config["motd_prefix"]}")
+
+    version = helper.replace_format_values(config["version_format"], [
+        ["{VERSION}", status.version.name]
+    ])
+
+    player_count = helper.replace_format_values(config["player_count_format"], [
+        ["{ONLINE}", status.players.online],
+        ["{MAX}", status.players.max]
+    ])
 
     # Todo: Add player limit in preferences
-    if status.players.sample != None and status.players.sample != []:
-        if len(status.players.sample) != 0:
-            if len(status.players.sample) == 1:
-                player_list = "`👤` "
-            else:
-                player_list = "`👥` "
-            for player in status.players.sample:
-                player_list += f"{player.name}, "
-            player_list = player_list.rstrip(", ")
+    pl = status.players.sample
+    if pl != [] and pl != None:
+        weird = False
+        for player in pl:
+            if "§" in player.name:
+                weird = True
+        if weird:
+            player_list = config["player_list_messages"]["custom"]
+        else:
+            # reminding_players = 0
+            # if len(pl) > config["player_list_max_players"]:
+            #     pl = pl[:config["player_list_max_players"]]
+            #     reminding_players = len(pl) - config["player_list_max_players"]
+            if len(pl) != 0:
+                if len(pl) == 1:
+                    player_list = config["player_list_prefix"]["single"]
+                else:
+                    player_list = config["player_list_prefix"]["multiple"]
+                for player in pl:
+                    player_list += f"{player.name}, "
+                player_list = player_list.rstrip(", ")
+                # if reminding_players != 0:
+                #     player_list += f" (and {reminding_players} more)"
+    elif pl == None:
+        player_list = config["player_list_messages"]["empty"]
     else:
-        player_list = "`⚠️` Player list is hidden on this server"
+        player_list = config["player_list_messages"]["hidden"]
 
     favicon = status.raw.get("favicon")
     if favicon:
@@ -45,12 +70,15 @@ async def minecraft_server(interaction: discord.Interaction, ip: str = DEFAULT_M
 
     embed = discord.Embed(
         title=ip,
-        description=f"{motd}\n{version}\n{player_count}\n{player_list}",
+        description=helper.replace_format_values(config["format"], [
+            ["{MOTD}", motd],
+            ["{VERSION}", version],
+            ["{PLAYER_COUNT}", player_count],
+            ["{PLAYER_LIST}", player_list]
+        ]),
         color=discord.Color.yellow()
     )
 
     embed.set_thumbnail(url=f"attachment://icon.jpg")
-
-    # embed.set_image(url=f"attachment://{image.value}.jpg")
 
     await interaction.response.send_message(embed=embed, file=icon_image)

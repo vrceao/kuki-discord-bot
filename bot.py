@@ -3,7 +3,7 @@ from discord import app_commands
 
 import helper
 
-preferences = helper.load_file("preferences.json")
+preferences = helper.load_file("preferences.jsonc")
 
 class MyBot(discord.Client):
     def __init__(self):

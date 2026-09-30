@@ -7,9 +7,12 @@ from datetime import datetime, timezone
 from bot import bot
 import helper
 
-@bot.tree.command(name="tibia_character", description="Display information about character")
+
+
+@bot.tree.command(name="tibia_character", description="View information about a character")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def tibia_character(interaction: discord.Interaction, character_name: str):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
 
     tibia_response = requests.get(f"https://api.tibiadata.com/v4/character/{character_name}").json()
@@ -75,9 +78,12 @@ async def tibia_character(interaction: discord.Interaction, character_name: str)
 
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="tibia_boosted", description="See today's boosted creatures")
+
+
+@bot.tree.command(name="tibia_boosted", description="View information about today's boosted creatures")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def tibia_boosted(interaction: discord.Interaction):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
 
     tibia_response = requests.get("https://api.tibiadata.com/v4/boostablebosses").json()

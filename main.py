@@ -14,7 +14,7 @@ import commands.minecraft
 
 BOT_TOKEN = helper.env("BOT_TOKEN")
 
-preferences = helper.load_file("preferences.json")
+preferences = helper.load_file("preferences.jsonc")
 
 bot_start_time = None
 
@@ -22,11 +22,13 @@ bot_start_time = None
 async def on_ready():
     print(f"{helper.prefix()} 🟢 {bot.user} is online!")
 
-@bot.tree.command(name="ping", description="See if bot if online")
+
+
+@bot.tree.command(name="ping", description="Check if bot is online")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def ping(interaction: discord.Interaction):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
-
     config = helper.get_command_config(interaction)
 
     unit = config["unit"]
@@ -47,18 +49,28 @@ async def ping(interaction: discord.Interaction):
 
     await interaction.response.send_message(response)
 
-@bot.tree.command(name="info", description="View information about this bot")
+
+
+@bot.tree.command(name="info", description="View information about the bot")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def info(interaction: discord.Interaction):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
+    config = helper.get_command_config(interaction)
 
-    repo = f"`🔗` Github: {preferences['github_repo']}"
-    discord_timestamp = f"<t:{bot_start_time}:R>"
-    time_since_start = f"`🕒` Bot started {discord_timestamp}"
+    repo = config["repo_format"]
 
+    timestamp = f"<t:{bot_start_time}:R>"
+    started = helper.replace_format_values(config["started_format"], [
+        ["{TIMESTAMP}", timestamp]
+    ])
+ 
     embed = discord.Embed(
         title=bot.user,
-        description=f"{repo}\n{time_since_start}",
+        description=helper.replace_format_values(config["format"], [
+            ["{REPO}", repo],
+            ["{STARTED}", started]
+        ]),
         color=discord.Color.yellow()
     )
 
@@ -66,39 +78,54 @@ async def info(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="commands", description="View the commands for this bot")
+
+
+@bot.tree.command(name="commands", description="View available commands")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def commands(interaction: discord.Interaction):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
+    config = helper.get_command_config(interaction)
 
-    # HARD
+    total_commands = 0
+    total_commands_used = 0
 
-    # commands_string = ""
-    # if preferences["count_commands"]:
-    #     path = "data/counts.json"
-    #     if not os.path.exists(path):
-    #         return
-
-    #     counts = helper.load_file("data/counts.json")
-    #     for command_name, enabled in preferences["commands"].items():
-    #         if enabled:
-    #             if command_name in counts:
-
-    #             commands_string += f"{command_name}\n"
-    # else:
-    #     for command_name, enabled in preferences["commands"].items():
-    #         if enabled:
-    #             commands_string += f"{command_name}\n"
+    command_list = ""
+    for command in preferences["commands"]:
+        if command["enabled"]:
+            total_commands += 1
+            count = config["count_for_disabled_count_commands"]
+            if preferences["count_commands"]:
+                count = helper.load_file("data/counts.json")[command["name"]]
+                total_commands_used += count
+            command_list += helper.replace_format_values(config["command_list_entry_format"], [
+                ["{EMOJI}", command.get("emoji", config["default_emoji"])],
+                ["{NAME}", command["name"]],
+                ["{COUNT}", count],
+                ["{DESCRIPTION}", command.get("description", config["no_description"])]
+            ])
+            command_list += "\n"
 
     embed = discord.Embed(
-        title=f"{bot.user} commands",
-        description="Here display all the available commands and how many times they been used if count_commands is enabled",
+        title=helper.replace_format_values(config["title"], [
+            ["{BOT}", str(bot.user)]
+        ]),
+        description=helper.replace_format_values(config["format"], [
+            ["{COMMAND_LIST}", command_list]
+        ]),
         color=discord.Color.yellow()
     )
 
-    embed.set_footer(text=f"⚙️ Total commands: yes")
+    if total_commands_used == 0:
+        total_commands_used = config["count_for_disabled_count_commands"]
+    embed.set_footer(text=helper.replace_format_values(config["footer_format"], [
+        ["{COUNT}", total_commands],
+        ["{USED}", total_commands_used]
+    ]))
 
     await interaction.response.send_message(embed=embed)
+
+
 
 def setup():
     global bot_start_time

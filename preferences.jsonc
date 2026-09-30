@@ -1,0 +1,193 @@
+{
+    "version": 3,
+    "json_format_version": 1,
+    "count_commands": true,
+    "log_commands": true,
+    "permission": {
+        "check": true,
+        "config": {
+            "title": "Insufficient permissions",
+            "format": "`⚠️` You don't have the permission to use this command!\n{COMMAND}\n{UID}\n{MESSAGE}",
+            "command_format": "`📟` Command you're trying to execute: /{COMMAND}",
+            "uid_format": "`🪪` Your UID: {UID}",
+            "message_format": "`ℹ️` Hey kuki here, I've disabled public access to this bot due to the commands being kinda sensitive. The code is still available on GitHub: https://github.com/vrceao/kuki-discord-bot"
+        }
+    },
+    "commands": [
+        {
+            "name": "ping",
+            "description": "Check if bot is online",
+            "category": "main",
+            "emoji": "🛜",
+            "enabled": true,
+            "allowed_users": [ 1098320594048667768 ],
+            "config": {
+                "format": "`🟢` Online • Response time: {PING}{UNIT}",
+                "unit": "ms",
+                "precision": 2
+            }
+        },
+        {
+            "name": "info",
+            "description": "View information about the bot",
+            "category": "main",
+            "emoji": "ℹ️",
+            "enabled": true,
+            "allowed_users": [ 1098320594048667768 ],
+            "config": {
+                "format": "{REPO}\n{STARTED}",
+                "repo_format": "`🔗` Github: https://github.com/vrceao/kuki-discord-bot",
+                "started_format": "`🕒` Bot started {TIMESTAMP}"
+            }
+        },
+        {
+            "name": "commands",
+            "description": "View available commands",
+            "category": "main",
+            "emoji": "🔧",
+            "enabled": true,
+            "allowed_users": [ 1098320594048667768 ],
+            "config": {
+                "title": "{BOT}'s commands",
+                "format": "{COMMAND_LIST}",
+                "default_emoji": "⚙️",
+                "no_description": "This command has no description",
+                "command_list_entry_format": "`{EMOJI}` /{NAME} [{COUNT}] - {DESCRIPTION}",
+                "footer_format": "⚙️ Total commands: {COUNT} | 📈 Total commands used: {USED}",
+                "count_for_disabled_count_commands": "Unknown"
+            }
+        },
+        {
+            "name": "read_directory",
+            "description": "Display contents of a directory on host's computer",
+            "category": "system",
+            "emoji": "📁",
+            "enabled": true,
+            "allowed_users": [ 1098320594048667768 ],
+            "config": {
+                "title": "Directory listing {DIRECTORY}",
+                "format": "{FILE_LIST}\n{STATUS}\n{FILTERED}",
+                "file_list_entry_format": "`{ICON}` {NAME}",
+                "messages": {
+                    "not_a_directory": "`⚠️` This is a file not a directory",
+                    "doesnt_exist": "`⚠️` Directory doesn't exist",
+                    "all_displayed": "`✅` All entries displayed",
+                    "truncated": {
+                        "single": "`⚠️` Truncated 1 result",
+                        "multiple": "`⚠️` Truncated {RESULTS} results"
+                    },
+                    "filtered": {
+                        "single": "`🔑` Filtered {FILTERED} result",
+                        "multiple": "`🔑` Filtered {FILTERED} result"
+                    }
+                },
+                "icons": {
+                    "folder": "📁",
+                    "file": "📄",
+                    "picture": "🖼️",
+                    "video": "🎥",
+                    "audio": "🔉",
+                    "executable": "⚙️",
+                    "archive": "🗜️",
+                    "text": "📜"
+                },
+                "extension_types": {
+                    "picture": ["png", "jpg", "jpeg", "webp", "kra", "psd", "gif"],
+                    "video": ["mp4", "mkv", "mov", "avi"],
+                    "audio": ["mp3", "opus", "wav"],
+                    "executable": ["exe"],
+                    "archive": ["zip", "rar", "7z", "tar", "gz"],
+                    "text": ["txt", "html", "xml", "css", "js", "ts", "json", "jsonc", "py", "md", "bat", "gitignore"]
+                }
+            }
+        },
+        {
+            "name": "read_file",
+            "description": "Display contents of a file on host's computer",
+            "category": "system",
+            "emoji": "📄",
+            "enabled": true
+        },
+        {
+            "name": "read_screen",
+            "description": "Send an image of host's computer screen",
+            "category": "system",
+            "emoji": "🖥️",
+            "enabled": true
+        },
+        {
+            "name": "tibia_character",
+            "description": "View information about a character",
+            "category": "tibia",
+            "emoji": "⚔️",
+            "enabled": true
+        },
+        {
+            "name": "tibia_boosted",
+            "description": "View information about today's boosted creatures",
+            "category": "tibia",
+            "emoji": "👹",
+            "enabled": true
+        },
+        {
+            "name": "hash",
+            "description": "Hash a string",
+            "category": "other",
+            "emoji": "#️⃣",
+            "enabled": true,
+            "allowed_users": [ 1098320594048667768 ],
+            "config": {
+                "title": "Hashing",
+                "format": "{ORIGINAL}\n{METHOD}\n{HASH}",
+                "original_format": "`®️` Input: `{ORIGINAL}`",
+                "method_format": "`🔓` Method: `{METHOD}`",
+                "hash_format": "`🔐` Hash: `{HASH}`"
+            }
+        },
+        {
+            "name": "picture",
+            "description": "Get a random picture from a directory",
+            "category": "other",
+            "emoji": "📸",
+            "enabled": true,
+            "allowed_users": [ 1098320594048667768 ],
+            "config": {
+                "pools": [
+                    {
+                        "directory": "assets/funny",
+                        "name": "Funny",
+                        "value": "funny"
+                    },
+                    {
+                        "directory": "assets/drawings",
+                        "name": "Drawings",
+                        "value": "drawings"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "minecraft_server",
+            "description": "View information about a Minecraft server",
+            "category": "minecraft",
+            "emoji": "⛏️",
+            "enabled": true,
+            "allowed_users": [ 1098320594048667768 ],
+            "config": {
+                "format": "{MOTD}\n{VERSION}\n{PLAYER_COUNT}\n{PLAYER_LIST}",
+                "motd_prefix": "`ℹ️` ",
+                "version_format": "`⚙️` Version: {VERSION}",
+                "player_count_format": "`📊` Player count: {ONLINE}/{MAX}",
+                "player_list_messages": {
+                    "custom": "`⚠️` This server has custom text in the player list",
+                    "empty": "`⚠️` There's no players on that server",
+                    "hidden": "`⚠️` Player list is hidden on this server"
+                },
+                "player_list_prefix": {
+                    "single": "`👤` ",
+                    "multiple": "`👥` "
+                }
+            }
+        }
+    ]
+}

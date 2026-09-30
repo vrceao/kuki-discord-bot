@@ -1,12 +1,12 @@
 import discord
 from discord import app_commands
 import os
-import pyautogui
+import re
 
 from bot import bot
 import helper
 
-preferences = helper.load_file("preferences.json")
+preferences = helper.load_file("preferences.jsonc")
 
 # Move all this config to preferences.json
 blacklisted_extensions = [
@@ -43,48 +43,37 @@ possible_syntax_highlights = [
     "lua", "md", "ini"
 ]
 
-# Todo: Put this in preferences.json and load from there
-icons = {
-    "folder": "📁",
-    "file": "📄",
-
-    "picture": "🖼️",
-    "video": "🎥",
-    "audio": "🔉",
-    "executable": "⚙️",
-    "archive": "🗜️",
-    "text": "📜",
-}
-
-# Todo: Put this in preferences too
-# Maybe instead just put it by file extension so like png: x, jpg: y, txt: z etc.
-extension_types = {
-    "picture": ["png", "jpg", "jpeg", "webp", "kra", "psd", "gif"],
-    "video": ["mp4", "mkv", "mov", "avi"],
-    "audio": ["mp3", "opus", "wav"],
-    "executable": ["exe"],
-    "archive": ["zip", "rar", "7z", "tar", "gz"],
-    "text": ["txt", "html", "xml", "css", "js", "ts", "json", "jsonc", "py", "md", "bat", "gitignore"]
-}
-
 image_extensions = [
     "png", "jpg", "jpeg", "gif"
 ]
 
+
+
 # Todo: Make "D:" and other drive letters work as a path because now it displays the current directory lol
-@bot.tree.command(name="read_directory", description="Read directory contents")
+@bot.tree.command(name="read_directory", description="Display contents of a directory on host's computer")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: int = 20, display_filtered: bool = False):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
+    config = helper.get_command_config(interaction)
+
+    if re.fullmatch(r"[C-Z]", dir):
+        dir += ":"
+
+    dir = dir.replace("/", "\\")
+    if not dir.endswith("\\"):
+        dir += "\\"
 
     # Error catching
     if not os.path.isdir(dir):
-        description = "`⚠️` This is a file not a directory"
+        description = config["messages"]["not_a_directory"]
         if not os.path.exists(dir):
-            description = "`⚠️` Directory doesn't exist"
+            description = config["messages"]["doesnt_exist"]
 
         embed = discord.Embed(
-            title=f"Directory listing: \"{dir}\"",
+            title=helper.replace_format_values(config["title"], [
+                ["{DIRECTORY}", f"`{dir}`"]
+            ]),
             description=description,
             color=discord.Color.yellow()
         )
@@ -96,7 +85,7 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
 
     # Todo: fix order because for some reason "/read_directory dir:D:/ entries_limit:2" breaks very badly (not common tho)
     # Yes, I vibecoded this for loop but it still doesn't work properly
-    contents_string = ""
+    file_list = ""
     filtered_folders = 0
     filtered_files = 0
     displayed = 0
@@ -111,38 +100,46 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
         if displayed >= entries_limit:
             remaining = len(directory_contents) - filtered_folders - filtered_files - displayed
             if remaining == 1:
-                contents_string += "`⚠️` Truncated 1 result"
+                status = config["messages"]["truncated"]["single"]
             else:
-                contents_string += f"`⚠️` Truncated {remaining} results"
+                status = helper.replace_format_values(config["messages"]["truncated"]["single"], [
+                    ["{RESULTS}", remaining]
+                ])
             break
 
-        # Make this better and finish it lol
         if os.path.isdir(full_path):
-            icon = f"`{icons['folder']}`"
+            icon = f"`{config['icons']['folder']}`"
         elif len(entry.split(".")) == 1:
-            icon = f"`{icons['file']}`"
+            icon = f"`{config['icons']['file']}`"
         else:
             extension = entry.split(".")[len(entry.split(".")) - 1]
-            if extension in extension_types["picture"]:
-                icon = icon = f"`{icons['picture']}`"
-            elif extension in extension_types["video"]:
-                icon = icon = f"`{icons['video']}`"
-            elif extension in extension_types["audio"]:
-                icon = icon = f"`{icons['audio']}`"
-            else:
-                icon = f"`{icons['file']}`"
-        contents_string += f"{icon} {entry}\n"
+            icon = config["icons"]["file"]
+            for type in config["extension_types"]:
+                if extension in config["extension_types"][type]:
+                    icon = config["icons"][type]
+                    break
+        file_list += helper.replace_format_values(config["file_list_entry_format"], [
+            ["{ICON}", icon],
+            ["{NAME}", entry]
+        ])
+        file_list += "\n"
         displayed += 1
     else:
-        contents_string += "`✅` All entries displayed"
+        status = config["messages"]["all_displayed"]
+    file_list = file_list.rstrip("\n")
 
     # Add filtered string
     filtered_total = filtered_folders + filtered_files
+    filtered = ""
     if filtered_total != 0:
         if filtered_total == 1:
-            contents_string += f"\n`🔑` Filtered {filtered_total} result"
+            filtered = helper.replace_format_values(config["messages"]["filtered"]["single"], [
+                ["{FILTERED}", filtered_total]
+            ])
         else:
-            contents_string += f"\n`🔑` Filtered {filtered_total} results"
+            filtered = helper.replace_format_values(config["messages"]["filtered"]["multiple"], [
+                ["{FILTERED}", filtered_total]
+            ])
 
     # Separate files and folders
     folders = 0
@@ -154,8 +151,14 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
             files += 1
 
     embed = discord.Embed(
-        title=f"Directory listing: \"{dir}\"",
-        description=contents_string,
+        title=helper.replace_format_values(config["title"], [
+            ["{DIRECTORY}", f"`{dir}`"]
+        ]),
+        description=helper.replace_format_values(config["format"], [
+            ["{FILE_LIST}", file_list],
+            ["{STATUS}", status],
+            ["{FILTERED}", filtered]
+        ]),
         color=discord.Color.yellow()
     )
 
@@ -163,11 +166,14 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
 
     await interaction.response.send_message(embed=embed)
 
+
+
 # Todo: When reading a file add ability to change starting character so that you can read the file in multiple requests even if its big
 # Todo: Also add ability to read from the end rather than from start
-@bot.tree.command(name="read_file", description="Read file contents")
+@bot.tree.command(name="read_file", description="Display contents of a file on host's computer")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def read_file(interaction: discord.Interaction, path: str, character_limit: int = 1000):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
 
     # Error catching
@@ -255,7 +261,9 @@ async def read_file(interaction: discord.Interaction, path: str, character_limit
 
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="read_screen", description="View the screen")
+
+
+@bot.tree.command(name="read_screen", description="Send an image of host's computer screen")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 @app_commands.choices(monitor=[
     app_commands.Choice(name="Primary", value="primary"),
@@ -263,6 +271,7 @@ async def read_file(interaction: discord.Interaction, path: str, character_limit
     app_commands.Choice(name="All", value="all")
 ])
 async def read_file(interaction: discord.Interaction, monitor: app_commands.Choice[str]):
+    if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
 
     os.makedirs("data/screenshots", exist_ok=True)

@@ -2,6 +2,6 @@ discord.py
 python-dotenv
 humanize
 requests
-pyautogui
 pillow
 mcstatus
+json5

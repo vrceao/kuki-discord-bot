@@ -1,8 +1,11 @@
 import json
+import json5
 import time
 import humanize
 import shutil
 import os
+import discord
+from discord import app_commands
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -13,10 +16,13 @@ def env(name):
 
 def load_file(path):
     with open(path, "r", encoding="utf-8") as file:
-        result = json.load(file)
+        if path.split(".")[-1] == "jsonc":
+            result = json5.load(file)
+        else:
+            result = json.load(file)
     return result
 
-preferences = load_file("preferences.json")
+preferences = load_file("preferences.jsonc")
 
 def colored(r, g, b, text, bold=False):
     style = "1;" if bold else ""
@@ -69,7 +75,7 @@ def log_command(interaction):
         "timestamp": current_timestamp(),
         "command": interaction.command.name,
         "user": interaction.user.name,
-        "channel": interaction.channel.name,
+        "channel": interaction.channel.id,
         "arguments": arguments
     })
 
@@ -96,7 +102,7 @@ def count_command(command_name):
         json.dump(counts, f, indent=4)
 
 def command_call(interaction):
-    return f"{prefix()} @{colored(128, 255, 128, interaction.user.name)} called /{colored(128, 255, 128, interaction.command.name)} in #{colored(128, 255, 128, interaction.channel.name)}"
+    return f"{prefix()} @{colored(128, 255, 128, interaction.user.name)} called /{colored(128, 255, 128, interaction.command.name)} in #{colored(128, 255, 128, interaction.channel.id)}"
 
 def used_command(interaction):
     if preferences["log_commands"]:
@@ -107,6 +113,33 @@ def used_command(interaction):
         count_command(interaction.command.name)
         return
 
+async def check_permissions(interaction):
+    if not preferences["permission"]["check"]: return True
+
+    for command in preferences["commands"]:
+        if command["name"] == interaction.command.name:
+            if interaction.user.id in command["allowed_users"]:
+                return True
+
+    config = preferences["permission"]["config"]
+
+    command = replace_format_values(config["command_format"], [["{COMMAND}", interaction.command.name]])
+    uid = replace_format_values(config["uid_format"], [["{UID}", interaction.user.id]])
+
+    embed = discord.Embed(
+        title=config["title"],
+        description=replace_format_values(config["format"], [
+            ["{COMMAND}", command],
+            ["{UID}", uid],
+            ["{MESSAGE}", config["message_format"]]
+        ]),
+        color=discord.Color.yellow()
+    )
+
+    await interaction.response.send_message(embed=embed)
+
+    return False
+
 def error_command(interaction, message):
     print(f"{command_call(interaction)} which resulted in an error: {colored(255, 128, 128, message)}")
     return
@@ -115,13 +148,20 @@ def format_filesize(size):
     return humanize.naturalsize(size)
 
 def get_command_config(interaction):
+    target = None
+
+    if isinstance(interaction, str):
+        target = interaction
+    else:
+        target = interaction.command.name
+    
     for command in preferences["commands"]:
-        if command["name"] == interaction.command.name:
+        if command["name"] == target:
             return command["config"]
     return None
 
 def replace_format_values(original, replacements):
-    modified = original
+    modified = str(original)
     for replacement in replacements:
-        modified = modified.replace(replacement[0], replacement[1])
+        modified = modified.replace(str(replacement[0]), str(replacement[1]))
     return modified
