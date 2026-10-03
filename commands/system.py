@@ -50,12 +50,13 @@ image_extensions = [
 
 
 # Todo: Make "D:" and other drive letters work as a path because now it displays the current directory lol
-@bot.tree.command(name="read_directory", description="Display contents of a directory on host's computer")
+command = helper.get_command_info("read_directory")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: int = 20, display_filtered: bool = False):
     if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
-    config = helper.get_command_config(interaction)
+    config = helper.get_command_info(interaction)["config"]
 
     if re.fullmatch(r"[C-Z]", dir):
         dir += ":"
@@ -170,7 +171,8 @@ async def read_dir(interaction: discord.Interaction, dir: str, entries_limit: in
 
 # Todo: When reading a file add ability to change starting character so that you can read the file in multiple requests even if its big
 # Todo: Also add ability to read from the end rather than from start
-@bot.tree.command(name="read_file", description="Display contents of a file on host's computer")
+command = helper.get_command_info("read_file")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def read_file(interaction: discord.Interaction, path: str, character_limit: int = 1000):
     if not await helper.check_permissions(interaction): return
@@ -263,7 +265,8 @@ async def read_file(interaction: discord.Interaction, path: str, character_limit
 
 
 
-@bot.tree.command(name="read_screen", description="Send an image of host's computer screen")
+command = helper.get_command_info("read_screen")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 @app_commands.choices(monitor=[
     app_commands.Choice(name="Primary", value="primary"),

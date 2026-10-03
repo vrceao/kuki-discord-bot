@@ -24,12 +24,13 @@ async def on_ready():
 
 
 
-@bot.tree.command(name="ping", description="Check if bot is online")
+command = helper.get_command_info("ping")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def ping(interaction: discord.Interaction):
     if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
-    config = helper.get_command_config(interaction)
+    config = helper.get_command_info(interaction)["config"]
 
     unit = config["unit"]
     latency = bot.latency * 1000
@@ -39,7 +40,6 @@ async def ping(interaction: discord.Interaction):
     elif unit == "s":
         latency = latency / 1000
     elif unit != "ms":
-        helper.error_command(interaction, "Unit was not assigned to a proper unit. Please use one of the following: s, ms, μs. Defaulting to ms")
         unit = "ms"
 
     response = helper.replace_format_values(config["format"], [
@@ -50,14 +50,17 @@ async def ping(interaction: discord.Interaction):
     await interaction.response.send_message(response)
 
 
-
-@bot.tree.command(name="info", description="View information about the bot")
+command = helper.get_command_info("info")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def info(interaction: discord.Interaction):
     if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
-    config = helper.get_command_config(interaction)
+    config = helper.get_command_info(interaction)["config"]
 
+    version = helper.replace_format_values(config["version_format"], [
+        ["{VERSION}", preferences["version"]]
+    ])
     repo = config["repo_format"]
 
     timestamp = f"<t:{bot_start_time}:R>"
@@ -68,6 +71,7 @@ async def info(interaction: discord.Interaction):
     embed = discord.Embed(
         title=bot.user,
         description=helper.replace_format_values(config["format"], [
+            ["{VERSION}", version],
             ["{REPO}", repo],
             ["{STARTED}", started]
         ]),
@@ -80,12 +84,13 @@ async def info(interaction: discord.Interaction):
 
 
 
-@bot.tree.command(name="commands", description="View available commands")
+command = helper.get_command_info("commands")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def commands(interaction: discord.Interaction):
     if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
-    config = helper.get_command_config(interaction)
+    config = helper.get_command_info(interaction)["config"]
 
     total_commands = 0
     total_commands_used = 0
@@ -94,11 +99,18 @@ async def commands(interaction: discord.Interaction):
     for command in preferences["commands"]:
         if command["enabled"]:
             total_commands += 1
-            count = config["count_for_disabled_count_commands"]
-            if preferences["count_commands"]:
+
+            count = config["count_unavailable"]
+            if preferences["count_commands"] and command["count_command"]:
                 count = helper.load_file("data/counts.json")[command["name"]]
                 total_commands_used += count
+
+            permission = config["permission_emojis"]["false"]
+            if "*" in command["allowed_users"] or interaction.user.id in command["allowed_users"]:
+                permission = config["permission_emojis"]["true"]
+
             command_list += helper.replace_format_values(config["command_list_entry_format"], [
+                ["{PERMISSION}", permission],
                 ["{EMOJI}", command.get("emoji", config["default_emoji"])],
                 ["{NAME}", command["name"]],
                 ["{COUNT}", count],
@@ -117,7 +129,7 @@ async def commands(interaction: discord.Interaction):
     )
 
     if total_commands_used == 0:
-        total_commands_used = config["count_for_disabled_count_commands"]
+        total_commands_used = config["count_unavailable"]
     embed.set_footer(text=helper.replace_format_values(config["footer_format"], [
         ["{COUNT}", total_commands],
         ["{USED}", total_commands_used]

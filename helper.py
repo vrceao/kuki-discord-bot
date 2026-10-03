@@ -56,7 +56,16 @@ def init_logs():
 
     log_file = path
 
-def log_command(interaction):
+def log_command(interaction, success: bool = True):
+    if not preferences["log_commands"]:
+        return
+
+    for command in preferences["commands"]:
+        if command["name"] == interaction.command.name:
+            if not command["log_command"]:
+                return
+            break
+
     if not os.path.exists(log_file):
         print("log file doesnt exist for some reason")
         return
@@ -74,6 +83,7 @@ def log_command(interaction):
         "unix_timestamp": int(str(time.time()).split(".")[0]),
         "timestamp": current_timestamp(),
         "command": interaction.command.name,
+        "success": success,
         "user": interaction.user.name,
         "channel": interaction.channel.id,
         "arguments": arguments
@@ -83,6 +93,15 @@ def log_command(interaction):
         json.dump(log, f, indent=4)
 
 def count_command(command_name):
+    if not preferences["count_commands"]:
+        return
+
+    for command in preferences["commands"]:
+        if command["name"] == command_name:
+            if not command["count_command"]:
+                return
+            break
+
     path = "data/counts.json"
 
     os.makedirs("data", exist_ok=True)
@@ -101,24 +120,33 @@ def count_command(command_name):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(counts, f, indent=4)
 
-def command_call(interaction):
-    return f"{prefix()} @{colored(128, 255, 128, interaction.user.name)} called /{colored(128, 255, 128, interaction.command.name)} in #{colored(128, 255, 128, interaction.channel.id)}"
+def print_command(interaction, success: bool = True):
+    if not preferences["print_commands"]:
+        return
+
+    for command in preferences["commands"]:
+        if command["name"] == interaction.command.name:
+            if not command["print_command"]:
+                return
+            break
+
+    if success:
+        print(f"{prefix()} @{colored(128, 255, 128, interaction.user.name)} called /{colored(128, 255, 128, interaction.command.name)} in #{colored(128, 255, 128, interaction.channel.id)} successfully")
+    else:
+        print(f"{prefix()} @{colored(128, 255, 128, interaction.user.name)} tried calling /{colored(128, 255, 128, interaction.command.name)} in #{colored(128, 255, 128, interaction.channel.id)} but didn't have permission")
 
 def used_command(interaction):
-    if preferences["log_commands"]:
-        log_command(interaction)
         # [*] Calling youmu_stare
-        print(f"{command_call(interaction)} successfully")
-    if preferences["count_commands"]:
+        log_command(interaction)
+        print_command(interaction)
         count_command(interaction.command.name)
-        return
 
 async def check_permissions(interaction):
     if not preferences["permission"]["check"]: return True
 
     for command in preferences["commands"]:
         if command["name"] == interaction.command.name:
-            if interaction.user.id in command["allowed_users"]:
+            if interaction.user.id in command["allowed_users"] or "*" in command["allowed_users"]:
                 return True
 
     config = preferences["permission"]["config"]
@@ -126,12 +154,18 @@ async def check_permissions(interaction):
     command = replace_format_values(config["command_format"], [["{COMMAND}", interaction.command.name]])
     uid = replace_format_values(config["uid_format"], [["{UID}", interaction.user.id]])
 
+    if preferences["permission"]["log_command"]:
+        log_command(interaction, False)
+    if preferences["permission"]["print_command"]:
+        print_command(interaction, False)
+
     embed = discord.Embed(
         title=config["title"],
         description=replace_format_values(config["format"], [
             ["{COMMAND}", command],
             ["{UID}", uid],
-            ["{MESSAGE}", config["message_format"]]
+            ["{MESSAGE}", config["message_format"]],
+            ["{REPO}", config["repo_format"]]
         ]),
         color=discord.Color.yellow()
     )
@@ -140,14 +174,10 @@ async def check_permissions(interaction):
 
     return False
 
-def error_command(interaction, message):
-    print(f"{command_call(interaction)} which resulted in an error: {colored(255, 128, 128, message)}")
-    return
-
 def format_filesize(size):
     return humanize.naturalsize(size)
 
-def get_command_config(interaction):
+def get_command_info(interaction):
     target = None
 
     if isinstance(interaction, str):
@@ -157,7 +187,8 @@ def get_command_config(interaction):
     
     for command in preferences["commands"]:
         if command["name"] == target:
-            return command["config"]
+            return command
+
     return None
 
 def replace_format_values(original, replacements):

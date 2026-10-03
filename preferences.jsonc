@@ -1,26 +1,49 @@
 {
-    "version": 3,
-    "json_format_version": 1,
+    // Bot version displayed in the /info command
+    "version": 4,
+    // Version of the json logs format
+    "json_format_version": 2,
+    // Whenever the amount commands have been used should be logged to data/counts.json
     "count_commands": true,
+    // Whenever the logs for every command used should be saved to the logs/ directory
     "log_commands": true,
+    // Whenever the commands used should be printed in the console
+    "print_commands": true,
+
+    // The configuration for commands varies, but it can be easily understood by using the command and looking at the values
+
+    // Configuration for the insufficient permissions to use a command
     "permission": {
+        // Whenever the allowed users should be checked, set to false to make every command accessible to everyone
         "check": true,
+        "log_command": true,
+        "print_command": true,
         "config": {
             "title": "Insufficient permissions",
-            "format": "`⚠️` You don't have the permission to use this command!\n{COMMAND}\n{UID}\n{MESSAGE}",
+            "format": "`⚠️` You don't have the permission to use this command!\n{COMMAND}\n{UID}\n{MESSAGE}\n{REPO}",
             "command_format": "`📟` Command you're trying to execute: /{COMMAND}",
             "uid_format": "`🪪` Your UID: {UID}",
-            "message_format": "`ℹ️` Hey kuki here, I've disabled public access to this bot due to the commands being kinda sensitive. The code is still available on GitHub: https://github.com/vrceao/kuki-discord-bot"
+            "message_format": "`ℹ️` Hey! kuki here, I've disabled public access to some commands since they were kinda sensitive. You can see what commands you can use with /commands",
+            "repo_format": "`🔗` Github: https://github.com/vrceao/kuki-discord-bot"
         }
     },
+
     "commands": [
         {
             "name": "ping",
             "description": "Check if bot is online",
+            // Not used yet
             "category": "main",
+            // Used in the /commands command
             "emoji": "🛜",
             "enabled": true,
-            "allowed_users": [ 1098320594048667768 ],
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            // UIDs of people that are allowed to use the command
+            // Add "*" to allow everyone
+            // Disable checking in permission.check to allow everyone to use every single command
+            "allowed_users": [ "*" ],
             "config": {
                 "format": "`🟢` Online • Response time: {PING}{UNIT}",
                 "unit": "ms",
@@ -33,9 +56,13 @@
             "category": "main",
             "emoji": "ℹ️",
             "enabled": true,
-            "allowed_users": [ 1098320594048667768 ],
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ "*" ],
             "config": {
-                "format": "{REPO}\n{STARTED}",
+                "format": "{VERSION}\n{REPO}\n{STARTED}",
+                "version_format": "`🚀` Version: {VERSION}",
                 "repo_format": "`🔗` Github: https://github.com/vrceao/kuki-discord-bot",
                 "started_format": "`🕒` Bot started {TIMESTAMP}"
             }
@@ -46,15 +73,22 @@
             "category": "main",
             "emoji": "🔧",
             "enabled": true,
-            "allowed_users": [ 1098320594048667768 ],
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ "*" ],
             "config": {
                 "title": "{BOT}'s commands",
                 "format": "{COMMAND_LIST}",
+                "command_list_entry_format": "`{PERMISSION}` `{EMOJI}` /{NAME} [{COUNT}] - {DESCRIPTION}",
                 "default_emoji": "⚙️",
+                "permission_emojis": {
+                    "true": "✅",
+                    "false": "❌"
+                },
                 "no_description": "This command has no description",
-                "command_list_entry_format": "`{EMOJI}` /{NAME} [{COUNT}] - {DESCRIPTION}",
-                "footer_format": "⚙️ Total commands: {COUNT} | 📈 Total commands used: {USED}",
-                "count_for_disabled_count_commands": "Unknown"
+                "count_unavailable": "Unknown",
+                "footer_format": "⚙️ Total commands: {COUNT} | 📈 Total commands used: {USED}"
             }
         },
         {
@@ -63,7 +97,10 @@
             "category": "system",
             "emoji": "📁",
             "enabled": true,
-            "allowed_users": [ 1098320594048667768 ],
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
             "config": {
                 "title": "Directory listing {DIRECTORY}",
                 "format": "{FILE_LIST}\n{STATUS}\n{FILTERED}",
@@ -78,7 +115,7 @@
                     },
                     "filtered": {
                         "single": "`🔑` Filtered {FILTERED} result",
-                        "multiple": "`🔑` Filtered {FILTERED} result"
+                        "multiple": "`🔑` Filtered {FILTERED} results"
                     }
                 },
                 "icons": {
@@ -106,28 +143,56 @@
             "description": "Display contents of a file on host's computer",
             "category": "system",
             "emoji": "📄",
-            "enabled": true
+            "enabled": true,
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
+            "config": {
+                
+            }
         },
         {
             "name": "read_screen",
             "description": "Send an image of host's computer screen",
             "category": "system",
             "emoji": "🖥️",
-            "enabled": true
+            "enabled": true,
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
+            "config": {
+                
+            }
         },
         {
             "name": "tibia_character",
             "description": "View information about a character",
             "category": "tibia",
             "emoji": "⚔️",
-            "enabled": true
+            "enabled": true,
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ "*" ],
+            "config": {
+                
+            }
         },
         {
             "name": "tibia_boosted",
             "description": "View information about today's boosted creatures",
             "category": "tibia",
             "emoji": "👹",
-            "enabled": true
+            "enabled": true,
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ "*" ],
+            "config": {
+                
+            }
         },
         {
             "name": "hash",
@@ -135,7 +200,10 @@
             "category": "other",
             "emoji": "#️⃣",
             "enabled": true,
-            "allowed_users": [ 1098320594048667768 ],
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ "*" ],
             "config": {
                 "title": "Hashing",
                 "format": "{ORIGINAL}\n{METHOD}\n{HASH}",
@@ -150,8 +218,12 @@
             "category": "other",
             "emoji": "📸",
             "enabled": true,
-            "allowed_users": [ 1098320594048667768 ],
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
             "config": {
+                "title": "Picture from {DATE}",
                 "pools": [
                     {
                         "directory": "assets/funny",
@@ -172,7 +244,10 @@
             "category": "minecraft",
             "emoji": "⛏️",
             "enabled": true,
-            "allowed_users": [ 1098320594048667768 ],
+            "count_command": true,
+            "log_command": true,
+            "print_command": true,
+            "allowed_users": [ "*" ],
             "config": {
                 "format": "{MOTD}\n{VERSION}\n{PLAYER_COUNT}\n{PLAYER_LIST}",
                 "motd_prefix": "`ℹ️` ",

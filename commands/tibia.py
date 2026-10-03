@@ -9,7 +9,8 @@ import helper
 
 
 
-@bot.tree.command(name="tibia_character", description="View information about a character")
+command = helper.get_command_info("tibia_character")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def tibia_character(interaction: discord.Interaction, character_name: str):
     if not await helper.check_permissions(interaction): return
@@ -80,7 +81,8 @@ async def tibia_character(interaction: discord.Interaction, character_name: str)
 
 
 
-@bot.tree.command(name="tibia_boosted", description="View information about today's boosted creatures")
+command = helper.get_command_info("tibia_boosted")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def tibia_boosted(interaction: discord.Interaction):
     if not await helper.check_permissions(interaction): return

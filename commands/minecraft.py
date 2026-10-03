@@ -8,12 +8,13 @@ import helper
 
 DEFAULT_MINECRAFT_SERVER_IP = helper.env("DEFAULT_MINECRAFT_SERVER_IP")
 
-@bot.tree.command(name="minecraft_server", description="View information about a Minecraft server")
+command = helper.get_command_info("minecraft_server")
+@bot.tree.command(name=command["name"], description=command["description"])
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def minecraft_server(interaction: discord.Interaction, ip: str = DEFAULT_MINECRAFT_SERVER_IP):
     if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
-    config = helper.get_command_config(interaction)
+    config = helper.get_command_info(interaction)["config"]
 
     server = JavaServer.lookup(ip)
     status = server.status()
