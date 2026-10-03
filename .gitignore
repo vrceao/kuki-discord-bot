@@ -1,10 +1,10 @@
 .env
+preferences.jsonc
 venv
 __pycache__/
 logs/*
 data/*
 temp
-aquestalk
 run.bat
-assets/drawings/*
-assets/funny/*
+assets/drawings
+assets/funny

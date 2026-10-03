@@ -4,7 +4,7 @@ import wave
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import aquestalk
+import tests.aquestalk as aquestalk
 
 aq = aquestalk.load('f1')
 wav = aq.synthe("こんにちわ")

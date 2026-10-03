@@ -23,7 +23,7 @@
             "format": "`⚠️` You don't have the permission to use this command!\n{COMMAND}\n{UID}\n{MESSAGE}\n{REPO}",
             "command_format": "`📟` Command you're trying to execute: /{COMMAND}",
             "uid_format": "`🪪` Your UID: {UID}",
-            "message_format": "`ℹ️` Hey! kuki here, I've disabled public access to some commands since they were kinda sensitive. You can see what commands you can use with /commands",
+            "message_format": "`ℹ️` Type /commands to see what commands you have access to",
             "repo_format": "`🔗` Github: https://github.com/vrceao/kuki-discord-bot"
         }
     },
@@ -100,7 +100,7 @@
             "count_command": true,
             "log_command": true,
             "print_command": true,
-            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
+            "allowed_users": [ "*" ],
             "config": {
                 "title": "Directory listing {DIRECTORY}",
                 "format": "{FILE_LIST}\n{STATUS}\n{FILTERED}",
@@ -147,7 +147,7 @@
             "count_command": true,
             "log_command": true,
             "print_command": true,
-            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
+            "allowed_users": [ "*" ],
             "config": {
                 
             }
@@ -161,7 +161,7 @@
             "count_command": true,
             "log_command": true,
             "print_command": true,
-            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
+            "allowed_users": [ "*" ],
             "config": {
                 
             }
@@ -221,20 +221,10 @@
             "count_command": true,
             "log_command": true,
             "print_command": true,
-            "allowed_users": [ 1098320594048667768, 859368691350503444 ],
+            "allowed_users": [ "*" ],
             "config": {
                 "title": "Picture from {DATE}",
                 "pools": [
-                    {
-                        "directory": "assets/funny",
-                        "name": "Funny",
-                        "value": "funny"
-                    },
-                    {
-                        "directory": "assets/drawings",
-                        "name": "Drawings",
-                        "value": "drawings"
-                    },
                     {
                         "directory": "assets/examples",
                         "name": "Examples",

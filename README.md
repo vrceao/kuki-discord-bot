@@ -33,7 +33,7 @@ Discord Bot with random features
 
 - ⛏️ /minecraft_server - View information about a Minecraft server
 
-*commands without configuration*
+**commands without configuration*
 
 ## Setup
 
@@ -51,6 +51,7 @@ The commands are for powershell, use common sense if you're using something diff
 git clone https://github.com/vrceao/kuki-discord-bot
 cd kuki-discord-bot
 copy .env.example .env
+copy preferences.example.jsonc preferences.jsonc
 py -m pip install -r requirements.txt
 ```
 
