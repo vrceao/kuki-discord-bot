@@ -16,7 +16,18 @@ async def tibia_character(interaction: discord.Interaction, character_name: str)
     if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
 
-    tibia_response = requests.get(f"https://api.tibiadata.com/v4/character/{character_name}").json()
+    response = requests.get(f"https://api.tibiadata.com/v5/character/{character_name}")
+    if response.status_code >= 400:
+        if response.status_code == 404:
+            message = f"Could not find a character named {character_name}."
+        elif response.status_code == 400:
+            message = "TibiaData could not process that character request."
+        else:
+            message = "TibiaData is temporarily unavailable."
+        await interaction.response.send_message(message, ephemeral=True)
+        return
+
+    tibia_response = response.json()
 
     character = tibia_response["character"]["character"]
 
@@ -41,7 +52,7 @@ async def tibia_character(interaction: discord.Interaction, character_name: str)
                 elif other_character["status"] == "online":
                     footer = f"🟢 Logged on {last_seen} at {last_login}"
     else:
-        # Todo: use /v4/world/{name} request on the players' world and see online players to determine if player is offline or not
+        # Todo: use /v5/world/{name} request on the players' world and see online players to determine if player is offline or not
         if "day" in last_seen or "month" in last_seen or "year" in last_seen:
             footer = f"🔴 Last seen {last_seen} at {last_login} (Hidden)"
         else:
@@ -88,7 +99,18 @@ async def tibia_boosted(interaction: discord.Interaction):
     if not await helper.check_permissions(interaction): return
     helper.used_command(interaction)
 
-    tibia_response = requests.get("https://api.tibiadata.com/v4/boostablebosses").json()
+    response = requests.get("https://api.tibiadata.com/v5/boostablebosses")
+    if response.status_code >= 400:
+        if response.status_code == 404:
+            message = "TibiaData could not find the requested resource."
+        elif response.status_code == 400:
+            message = "TibiaData could not process the request."
+        else:
+            message = "TibiaData is temporarily unavailable."
+        await interaction.response.send_message(message, ephemeral=True)
+        return
+
+    tibia_response = response.json()
 
     boosted_boss = tibia_response["boostable_bosses"]["boosted"]
 
